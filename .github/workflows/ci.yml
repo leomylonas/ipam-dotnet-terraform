@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  provider:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: Go test
+        run: |
+          go mod tidy
+          go test ./...
+      - name: Build provider binary
+        run: |
+          go build -o terraform-provider-ipam .
+          mkdir -p ./.terraform-dev
+          mv terraform-provider-ipam ./.terraform-dev/
+      - name: Terraform validate examples
+        uses: hashicorp/setup-terraform@v3
+      - run: |
+          cat > "$RUNNER_TEMP/terraformrc" <<RC
+          provider_installation {
+            dev_overrides {
+              "leomylonas/dotnet-ipam-terraform" = "${PWD}/.terraform-dev"
+            }
+            direct {}
+          }
+          RC
+          export TF_CLI_CONFIG_FILE="$RUNNER_TEMP/terraformrc"
+          cd examples/basic
+          terraform init -backend=false
+          terraform validate

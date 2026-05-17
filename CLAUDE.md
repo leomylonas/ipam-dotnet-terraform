@@ -28,7 +28,7 @@ Keep immutable-by-design fields create-only:
 - allocation identity fields
 - shared access identity tuple
 
-### 2. Provider implementation in `ipam-dotnet-terraform` (Phase 2)
+### 2. Provider implementation in `leomylonas/dotnet-ipam-terraform` (Phase 2)
 
 Use `terraform-plugin-framework` with standard provider architecture.
 
