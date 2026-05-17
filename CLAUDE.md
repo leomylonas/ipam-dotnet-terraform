@@ -11,7 +11,7 @@ Current scope includes core resources plus allocations and tags, plus read-focus
 
 ## Key Changes
 
-### 1. API prerequisites in `ipam-dotnet` 
+### 1. API prerequisites in `dotnet-ipam` 
 
 Add update endpoints:
 
@@ -105,7 +105,7 @@ CI pipeline expectations:
 
 ## Test Plan
 
-### 1. API phase tests (`ipam-dotnet`)
+### 1. API phase tests (`dotnet-ipam`)
 
 - Integration tests for each new update endpoint:
   - authorized success
@@ -131,7 +131,7 @@ CI pipeline expectations:
 
 ## Public Interfaces / Types Affected
 
-- New API DTOs and update endpoints in `ipam-dotnet`.
+- New API DTOs and update endpoints in `dotnet-ipam`.
 - Provider schema surface:
   - provider arguments (`base_url`, `username`, `password`, etc.)
   - resource/data source schemas

@@ -4,7 +4,7 @@
 |---|---|
 | Terraform CLI | >= 1.6 |
 | Go toolchain (for development) | 1.24.x |
-| IPAM API | Current `ipam-dotnet` API surface used by this provider |
+| IPAM API | Current `dotnet-ipam` API surface used by this provider |
 
 ## Immutable (ForceNew) Fields
 

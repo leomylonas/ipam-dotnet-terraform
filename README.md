@@ -1,6 +1,6 @@
 # leomylonas/dotnet-ipam
 
-Terraform provider for the [`ipam-dotnet`](https://github.com/leomylonas/ipam-dotnet) API.
+Terraform provider for the [`dotnet-ipam`](https://github.com/leomylonas/dotnet-ipam) API.
 
 ## What This Project Provides
 
@@ -65,7 +65,7 @@ Prerequisites:
 
 - Go `1.24+`
 - Terraform CLI
-- Running `ipam-dotnet` API endpoint
+- Running `dotnet-ipam` API endpoint
 
 ### Makefile workflow
 
