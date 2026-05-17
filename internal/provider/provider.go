@@ -169,6 +169,20 @@ func (p *ipamProvider) DataSources(_ context.Context) []func() datasource.DataSo
 }
 
 func providerDataFrom(v any) (*providerData, error) {
+	if v == nil {
+		placeholder, _ := newAPIClient(
+			"http://127.0.0.1",
+			"placeholder",
+			"placeholder",
+			30*time.Second,
+			false,
+			0,
+			200*time.Millisecond,
+			200*time.Millisecond,
+		)
+		return &providerData{client: placeholder}, nil
+	}
+
 	pd, ok := v.(*providerData)
 	if !ok || pd == nil || pd.client == nil {
 		return nil, fmt.Errorf("provider not configured")
