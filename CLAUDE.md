@@ -7,11 +7,11 @@ Build this as a two-phase delivery:
 1. Extend the IPAM API to add missing update operations needed for stable Terraform lifecycle semantics.
 2. Implement a Terraform provider (Plugin Framework) with aliased-provider workflows for multi-role operation (`GlobalAdmin`, `TenantAdmin`, `TenantUser`).
 
-V1 scope includes core resources plus allocations and tags, plus read-focused data sources, excluding audit logs.
+Current scope includes core resources plus allocations and tags, plus read-focused data sources, excluding audit logs.
 
 ## Key Changes
 
-### 1. API prerequisites in `ipam-dotnet` (Phase 1)
+### 1. API prerequisites in `ipam-dotnet` 
 
 Add update endpoints:
 
@@ -28,7 +28,7 @@ Keep immutable-by-design fields create-only:
 - allocation identity fields
 - shared access identity tuple
 
-### 2. Provider implementation in `leomylonas/dotnet-ipam-terraform` (Phase 2)
+### 2. Provider implementation in `leomylonas/dotnet-ipam-terraform` 
 
 Use `terraform-plugin-framework` with standard provider architecture.
 
@@ -46,7 +46,7 @@ HTTP client layer requirements:
 - consistent error mapping
 - retry/backoff for transient `5xx` / `429`
 
-Resources (v1):
+Resources:
 
 - `ipam_tenancy`
 - `ipam_user`
@@ -57,7 +57,7 @@ Resources (v1):
 - `ipam_allocation`
 - `ipam_allocation_tags`
 
-Data sources (v1):
+Data sources:
 
 - tenancy/users/subnets/allocation lookups
 - `ipam_subnet_stats`
@@ -141,6 +141,6 @@ CI pipeline expectations:
 
 - Provider stack: `terraform-plugin-framework`.
 - Aliased provider pattern is the primary multi-role workflow model.
-- V1 includes allocations and tags.
-- Audit logs are not exposed as a Terraform data source in v1.
-- Any field still lacking API update support after Phase 1 remains ForceNew.
+- current release includes allocations and tags.
+- Audit logs are not exposed as a Terraform data source in the current release.
+- Any field still lacking API update support after API alignment remains ForceNew.

@@ -15,14 +15,25 @@ import (
 	"time"
 )
 
-type apiClient struct {
-	baseURL  string
-	username string
-	password string
-	client   *http.Client
+type problemDetails struct {
+	Type   string              `json:"type"`
+	Title  string              `json:"title"`
+	Status int                 `json:"status"`
+	Detail string              `json:"detail"`
+	Errors map[string][]string `json:"errors"`
 }
 
-func newAPIClient(baseURL, username, password string, timeout time.Duration, insecureSkipTLS bool) (*apiClient, error) {
+type apiClient struct {
+	baseURL      string
+	username     string
+	password     string
+	client       *http.Client
+	maxRetries   int
+	retryWaitMin time.Duration
+	retryWaitMax time.Duration
+}
+
+func newAPIClient(baseURL, username, password string, timeout time.Duration, insecureSkipTLS bool, maxRetries int, retryWaitMin, retryWaitMax time.Duration) (*apiClient, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return nil, err
@@ -44,6 +55,9 @@ func newAPIClient(baseURL, username, password string, timeout time.Duration, ins
 			Timeout:   timeout,
 			Transport: transport,
 		},
+		maxRetries:   maxRetries,
+		retryWaitMin: retryWaitMin,
+		retryWaitMax: retryWaitMax,
 	}, nil
 }
 
@@ -58,7 +72,7 @@ func (c *apiClient) doJSON(ctx context.Context, method, path string, reqBody any
 	}
 
 	var lastErr error
-	for attempt := 0; attempt < 3; attempt++ {
+	for attempt := 0; attempt <= c.maxRetries; attempt++ {
 		var body io.Reader
 		if reqBody != nil {
 			body = bytes.NewReader(payload)
@@ -75,8 +89,8 @@ func (c *apiClient) doJSON(ctx context.Context, method, path string, reqBody any
 
 		resp, err := c.client.Do(req)
 		if err != nil {
-			if isRetryableNetErr(err) && attempt < 2 {
-				time.Sleep(time.Duration(attempt+1) * 200 * time.Millisecond)
+			if isRetryableNetErr(err) && attempt < c.maxRetries {
+				sleepWithBackoff(c.retryWaitMin, c.retryWaitMax, attempt)
 				continue
 			}
 			return err
@@ -94,12 +108,12 @@ func (c *apiClient) doJSON(ctx context.Context, method, path string, reqBody any
 			return nil
 		}
 
-		if (resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500) && attempt < 2 {
-			time.Sleep(time.Duration(attempt+1) * 200 * time.Millisecond)
+		if (resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500) && attempt < c.maxRetries {
+			sleepWithBackoff(c.retryWaitMin, c.retryWaitMax, attempt)
 			continue
 		}
 
-		lastErr = &apiError{StatusCode: resp.StatusCode, Body: string(respBytes)}
+		lastErr = newAPIError(resp.StatusCode, respBytes, resp.Header.Get("Content-Type"))
 		break
 	}
 
@@ -107,6 +121,14 @@ func (c *apiClient) doJSON(ctx context.Context, method, path string, reqBody any
 		return lastErr
 	}
 	return fmt.Errorf("request failed without response")
+}
+
+func sleepWithBackoff(minWait, maxWait time.Duration, attempt int) {
+	wait := minWait * time.Duration(1<<attempt)
+	if wait > maxWait {
+		wait = maxWait
+	}
+	time.Sleep(wait)
 }
 
 func isExpected(code int, expected ...int) bool {
@@ -126,11 +148,63 @@ func isRetryableNetErr(err error) bool {
 type apiError struct {
 	StatusCode int
 	Body       string
+	Title      string
+	Detail     string
+	Validation map[string][]string
 }
 
 func (e *apiError) Error() string {
-	if e.Body == "" {
-		return fmt.Sprintf("ipam api returned status %d", e.StatusCode)
+	base := fmt.Sprintf("ipam api returned status %d", e.StatusCode)
+
+	if e.Title != "" && e.Detail != "" {
+		base = fmt.Sprintf("%s: %s - %s", base, e.Title, e.Detail)
+	} else if e.Title != "" {
+		base = fmt.Sprintf("%s: %s", base, e.Title)
+	} else if e.Detail != "" {
+		base = fmt.Sprintf("%s: %s", base, e.Detail)
 	}
-	return fmt.Sprintf("ipam api returned status %d: %s", e.StatusCode, e.Body)
+
+	if len(e.Validation) > 0 {
+		pairs := make([]string, 0)
+		for field, errs := range e.Validation {
+			if len(errs) == 0 {
+				continue
+			}
+			pairs = append(pairs, fmt.Sprintf("%s=%s", field, strings.Join(errs, "; ")))
+		}
+		if len(pairs) > 0 {
+			return fmt.Sprintf("%s (validation: %s)", base, strings.Join(pairs, ", "))
+		}
+	}
+
+	if e.Body != "" && e.Title == "" && e.Detail == "" {
+		return fmt.Sprintf("%s: %s", base, e.Body)
+	}
+	return base
+}
+
+func newAPIError(status int, body []byte, contentType string) *apiError {
+	err := &apiError{
+		StatusCode: status,
+		Body:       strings.TrimSpace(string(body)),
+	}
+
+	if len(body) == 0 {
+		return err
+	}
+
+	// ASP.NET ProblemDetails typically use application/problem+json but some
+	// middlewares may still return application/json; parse both.
+	if strings.Contains(contentType, "json") {
+		var pd problemDetails
+		if json.Unmarshal(body, &pd) == nil {
+			if pd.Title != "" || pd.Detail != "" || len(pd.Errors) > 0 {
+				err.Title = pd.Title
+				err.Detail = pd.Detail
+				err.Validation = pd.Errors
+			}
+		}
+	}
+
+	return err
 }

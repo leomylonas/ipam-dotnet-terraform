@@ -25,6 +25,9 @@ type ipamProviderModel struct {
 	Password        types.String `tfsdk:"password"`
 	TimeoutSeconds  types.Int64  `tfsdk:"timeout_seconds"`
 	InsecureSkipTLS types.Bool   `tfsdk:"insecure_skip_tls_verify"`
+	MaxRetries      types.Int64  `tfsdk:"max_retries"`
+	RetryWaitMinMs  types.Int64  `tfsdk:"retry_wait_min_ms"`
+	RetryWaitMaxMs  types.Int64  `tfsdk:"retry_wait_max_ms"`
 }
 
 type providerData struct {
@@ -50,6 +53,9 @@ func (p *ipamProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			"password":                 schema.StringAttribute{Required: true, Sensitive: true},
 			"timeout_seconds":          schema.Int64Attribute{Optional: true},
 			"insecure_skip_tls_verify": schema.BoolAttribute{Optional: true},
+			"max_retries":              schema.Int64Attribute{Optional: true},
+			"retry_wait_min_ms":        schema.Int64Attribute{Optional: true},
+			"retry_wait_max_ms":        schema.Int64Attribute{Optional: true},
 		},
 	}
 }
@@ -70,12 +76,41 @@ func (p *ipamProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	if !config.TimeoutSeconds.IsNull() {
 		timeout = time.Duration(config.TimeoutSeconds.ValueInt64()) * time.Second
 	}
+	maxRetries := int64(2)
+	if !config.MaxRetries.IsNull() {
+		maxRetries = config.MaxRetries.ValueInt64()
+	}
+	retryWaitMin := int64(200)
+	if !config.RetryWaitMinMs.IsNull() {
+		retryWaitMin = config.RetryWaitMinMs.ValueInt64()
+	}
+	retryWaitMax := int64(2000)
+	if !config.RetryWaitMaxMs.IsNull() {
+		retryWaitMax = config.RetryWaitMaxMs.ValueInt64()
+	}
+	if maxRetries < 0 {
+		resp.Diagnostics.AddAttributeError(path.Root("max_retries"), "Invalid max_retries", "max_retries must be >= 0")
+		return
+	}
+	if retryWaitMin <= 0 || retryWaitMax <= 0 || retryWaitMin > retryWaitMax {
+		resp.Diagnostics.AddError("Invalid retry settings", "retry_wait_min_ms and retry_wait_max_ms must be > 0 and min <= max")
+		return
+	}
 	insecure := false
 	if !config.InsecureSkipTLS.IsNull() {
 		insecure = config.InsecureSkipTLS.ValueBool()
 	}
 
-	client, err := newAPIClient(config.BaseURL.ValueString(), config.Username.ValueString(), config.Password.ValueString(), timeout, insecure)
+	client, err := newAPIClient(
+		config.BaseURL.ValueString(),
+		config.Username.ValueString(),
+		config.Password.ValueString(),
+		timeout,
+		insecure,
+		int(maxRetries),
+		time.Duration(retryWaitMin)*time.Millisecond,
+		time.Duration(retryWaitMax)*time.Millisecond,
+	)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to configure IPAM client", err.Error())
 		return
@@ -95,6 +130,7 @@ func (p *ipamProvider) Resources(_ context.Context) []func() resource.Resource {
 		NewSharedSubnetAccessResource,
 		NewExclusionResource,
 		NewAllocationResource,
+		NewBulkAllocationResource,
 		NewAllocationTagsResource,
 	}
 }
@@ -107,6 +143,7 @@ func (p *ipamProvider) DataSources(_ context.Context) []func() datasource.DataSo
 		NewPrivateSubnetsDataSource,
 		NewAllocationDataSource,
 		NewAllocationsDataSource,
+		NewBulkAllocationsDataSource,
 		NewSubnetStatsDataSource,
 	}
 }

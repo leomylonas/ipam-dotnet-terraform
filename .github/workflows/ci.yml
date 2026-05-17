@@ -12,15 +12,15 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.24.x'
-      - name: Go test
+      - name: Prepare modules
         run: |
-          go mod tidy
-          go test ./...
+          make tidy
+      - name: Unit tests
+        run: |
+          make test
       - name: Build provider binary
         run: |
-          go build -o terraform-provider-ipam .
-          mkdir -p ./.terraform-dev
-          mv terraform-provider-ipam ./.terraform-dev/
+          make dev-install
       - name: Terraform validate examples
         uses: hashicorp/setup-terraform@v3
       - run: |
@@ -33,6 +33,9 @@ jobs:
           }
           RC
           export TF_CLI_CONFIG_FILE="$RUNNER_TEMP/terraformrc"
-          cd examples/basic
-          terraform init -backend=false
-          terraform validate
+          for ex in examples/basic examples/multi-role; do
+            cd "$ex"
+            terraform init -backend=false
+            terraform validate
+            cd - >/dev/null
+          done

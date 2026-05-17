@@ -1,52 +1,39 @@
-# AGENTS Plan: IPAM Terraform Provider + API Prerequisites
+# AGENTS: Current Implementation Guide
 
 ## Summary
 
-Build this as a two-phase delivery:
+`leomylonas/dotnet-ipam-terraform` is a Terraform provider for the `ipam-dotnet` API.
 
-1. Extend the IPAM API to add missing update operations needed for stable Terraform lifecycle semantics.
-2. Implement a Terraform provider (Plugin Framework) with aliased-provider workflows for multi-role operation (`GlobalAdmin`, `TenantAdmin`, `TenantUser`).
+Current implementation includes:
 
-V1 scope includes core resources plus allocations and tags, plus read-focused data sources, excluding audit logs.
+- Full provider/resource/data-source scaffolding with HashiCorp Plugin Framework.
+- Role-aware workflows via provider aliases (`GlobalAdmin`, `TenantAdmin`, `TenantUser`).
+- HTTP Basic Auth client with retry/backoff controls.
+- Resource and data-source docs with runnable examples.
+- Acceptance test harness for real API environments.
+- CI and release scaffolding.
 
-## Key Changes
+## Provider Behavior
 
-### 1. API prerequisites in `ipam-dotnet` (Phase 1)
+Provider schema:
 
-Add update endpoints:
+- `base_url` (required)
+- `username` (required)
+- `password` (required, sensitive)
+- `timeout_seconds` (optional, default `30`)
+- `insecure_skip_tls_verify` (optional, default `false`)
+- `max_retries` (optional, default `2`)
+- `retry_wait_min_ms` (optional, default `200`)
+- `retry_wait_max_ms` (optional, default `2000`)
 
-- `PATCH/PUT /api/tenancies/{id}` for `name`, `description`.
-- `PATCH/PUT /api/tenancies/{tenancyId}/subnets/{subnetId}` for private subnet `name`, `description` only.
-- `PATCH/PUT /api/subnets/shared/{id}` for shared subnet `name`, `description` only.
-- `PATCH/PUT /api/subnets/{subnetId}/exclusions/{id}` for exclusion `description` only.
-- `PATCH/PUT /api/users/{id}` for non-password mutable user profile fields (minimum: `username`; role/tenancy optional based on business rules).
+Client behavior:
 
-Keep immutable-by-design fields create-only:
+- Uses Basic Auth on every request.
+- Retries transient failures (`429`, `5xx`, retryable network errors).
+- Exponential backoff bounded by configured retry wait min/max.
+- Returns normalized API errors with status/body context.
 
-- subnet `cidr`
-- exclusion `start` / `end`
-- allocation identity fields
-- shared access identity tuple
-
-### 2. Provider implementation in `leomylonas/dotnet-ipam-terraform` (Phase 2)
-
-Use `terraform-plugin-framework` with standard provider architecture.
-
-Provider config:
-
-- `base_url`
-- `username`
-- `password` (sensitive)
-- optional insecure TLS handling for non-prod
-- request timeout
-
-HTTP client layer requirements:
-
-- Basic Auth on every request
-- consistent error mapping
-- retry/backoff for transient `5xx` / `429`
-
-Resources (v1):
+## Implemented Resources
 
 - `ipam_tenancy`
 - `ipam_user`
@@ -55,92 +42,111 @@ Resources (v1):
 - `ipam_shared_subnet_access`
 - `ipam_exclusion`
 - `ipam_allocation`
+- `ipam_bulk_allocation`
 - `ipam_allocation_tags`
 
-Data sources (v1):
+## Implemented Data Sources
 
-- tenancy/users/subnets/allocation lookups
+- `ipam_tenancy`
+- `ipam_users`
+- `ipam_shared_subnets`
+- `ipam_private_subnets`
+- `ipam_allocation`
+- `ipam_allocations`
+- `ipam_bulk_allocations`
 - `ipam_subnet_stats`
-- `ipam_allocations` (with optional tag filters)
-- **no `ipam_audit_logs` data source**
 
-Lifecycle rules:
+Not implemented:
 
-- Use Update where supported by API.
-- ForceNew for immutable attributes:
-  - subnet `cidr`
-  - exclusion `start` / `end`
-  - allocation request attributes
-  - shared access identity
-- `ipam_allocation_tags` should use full replace behavior to match API `PUT` semantics.
+- `ipam_audit_logs`
 
-Import ID conventions:
+## Lifecycle and Import Semantics
 
-- Single ID: tenancy, user, shared subnet, allocation
+Update-in-place resources:
+
+- `ipam_tenancy` (`name`, `description`)
+- `ipam_user` (`username`, `role`, `tenancy_id`)
+- `ipam_private_subnet` (`name`, `description`)
+- `ipam_shared_subnet` (`name`, `description`)
+- `ipam_exclusion` (`description`)
+- `ipam_allocation_tags` (full replace)
+
+Replace-on-change resources/fields:
+
+- `ipam_shared_subnet_access` identity (`subnet_id`, `tenancy_id`)
+- `ipam_allocation` request fields (`subnet_id`, `description`)
+- `ipam_bulk_allocation` request fields (`subnet_id`, `count`, `description`)
+- Private/shared subnet `cidr`
+- Exclusion `start` / `end`
+- Tenancy bootstrap admin credentials (`admin_username`, `admin_password`)
+
+Import formats:
+
+- Single ID: tenancy, user, shared subnet, allocation, bulk allocation
 - Composite IDs:
   - private subnet: `{tenancy_id}/{subnet_id}`
   - exclusion: `{subnet_id}/{exclusion_id}`
-  - shared access: `{subnet_id}/{tenancy_id}`
+  - shared subnet access: `{subnet_id}/{tenancy_id}`
   - allocation tags: `{allocation_id}`
 
-### 3. Multi-role usage model
+## API Alignment Assumptions
 
-Document and support aliased providers (for example `ipam.global`, `ipam.tenant_admin`, `ipam.tenant_user`).
+Provider update behavior assumes these API endpoints exist:
 
-Provider should return clear diagnostics for insufficient permissions (`403`).
+- `PUT /api/tenancies/{id}`
+- `PUT /api/users/{id}`
+- `PUT /api/tenancies/{tenancyId}/subnets/{subnetId}`
+- `PUT /api/subnets/shared/{id}`
+- `PUT /api/subnets/{subnetId}/exclusions/{id}`
 
-### 4. Quality and release setup
+If API contracts change, re-evaluate lifecycle settings and acceptance tests.
 
-Acceptance test setup:
+## Testing
 
-- Run local API (`docker-compose` or scripted `dotnet run`)
-- Seed identities for each role
+Unit/build checks:
 
-CI pipeline expectations:
+- `go test ./...`
 
-- `go test`
-- acceptance tests
-- `terraform validate` on examples
-- docs generation
+Acceptance tests (real API):
 
-## Test Plan
+- Environment variables required:
+  - `IPAM_ACC=1`
+  - `IPAM_BASE_URL`
+  - `IPAM_USERNAME`
+  - `IPAM_PASSWORD`
+- Run:
+  - `make testacc`
+  - or `go test ./internal/provider -v -run 'TestAcc' -count=1`
 
-### 1. API phase tests (`ipam-dotnet`)
+Acceptance coverage includes resource CRUD/import paths and allocation data-source checks.
 
-- Integration tests for each new update endpoint:
-  - authorized success
-  - forbidden cross-tenancy / insufficient role
-  - not found
-  - conflict / validation failures
-- Regression coverage for existing create/delete/list behavior.
+## Examples and Docs
 
-### 2. Provider unit/integration tests
+Examples:
 
-- CRUD + import for each resource.
-- ForceNew checks for immutable attributes.
-- Update-in-place checks for newly updatable attributes.
-- Auth/authorization diagnostics (`401` / `403`).
-- Drift/read checks for aliased provider tenancy scoping.
+- `examples/basic`
+- `examples/multi-role`
 
-### 3. End-to-end Terraform scenarios
+Reference docs:
 
-- Global admin creates tenancy/shared subnet/access grants.
-- Tenant admin creates private subnet/exclusions/users.
-- Tenant user allocates/releases IP and manages tags.
-- Stats/allocation data sources return expected scoped results.
+- `docs/resources/*`
+- `docs/data-sources/*`
+- `docs/TROUBLESHOOTING.md`
+- `docs/COMPATIBILITY.md`
+- `docs/RELEASE.md`
 
-## Public Interfaces / Types Affected
+## CI and Release
 
-- New API DTOs and update endpoints in `ipam-dotnet`.
-- Provider schema surface:
-  - provider arguments (`base_url`, `username`, `password`, etc.)
-  - resource/data source schemas
-  - documented import formats
+CI workflows:
 
-## Assumptions and Defaults
+- `.github/workflows/ci.yml`:
+  - `go test ./...`
+  - provider build
+  - `terraform validate` for `examples/basic` and `examples/multi-role` via dev overrides
+- `.github/workflows/acceptance.yml`:
+  - manual acceptance test run using repository secrets
 
-- Provider stack: `terraform-plugin-framework`.
-- Aliased provider pattern is the primary multi-role workflow model.
-- V1 includes allocations and tags.
-- Audit logs are not exposed as a Terraform data source in v1.
-- Any field still lacking API update support after Phase 1 remains ForceNew.
+Release scaffolding:
+
+- `.goreleaser.yaml` for cross-platform archives and checksums
+- `Makefile` targets for build/test/acceptance/dev-install

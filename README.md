@@ -1,6 +1,6 @@
 # leomylonas/dotnet-ipam-terraform
 
-Terraform provider for the `ipam-dotnet` API.
+Terraform provider for the [`ipam-dotnet`](https://github.com/leomylonas/ipam-dotnet) API.
 
 ## What This Project Provides
 
@@ -20,6 +20,7 @@ Terraform provider for the `ipam-dotnet` API.
 - `ipam_shared_subnet_access`
 - `ipam_exclusion`
 - `ipam_allocation`
+- `ipam_bulk_allocation`
 - `ipam_allocation_tags`
 
 ## Implemented Data Sources
@@ -30,11 +31,8 @@ Terraform provider for the `ipam-dotnet` API.
 - `ipam_private_subnets`
 - `ipam_allocation`
 - `ipam_allocations`
+- `ipam_bulk_allocations`
 - `ipam_subnet_stats`
-
-Not included:
-
-- `ipam_audit_logs`
 
 ## Provider Configuration
 
@@ -44,6 +42,9 @@ provider "ipam" {
   username                 = var.ipam_username
   password                 = var.ipam_password
   timeout_seconds          = 30
+  max_retries              = 2
+  retry_wait_min_ms        = 200
+  retry_wait_max_ms        = 2000
   insecure_skip_tls_verify = false
 }
 ```
@@ -56,6 +57,7 @@ provider "ipam" {
   - exclusion: `{subnet_id}/{exclusion_id}`
   - shared access: `{subnet_id}/{tenancy_id}`
   - allocation tags: `{allocation_id}`
+  - bulk allocation: `{bulk_id}`
 
 ## Development
 
@@ -65,14 +67,29 @@ Prerequisites:
 - Terraform CLI
 - Running `ipam-dotnet` API endpoint
 
-Commands:
+### Makefile workflow
+
+The `Makefile` is the primary local developer interface for repeatable commands.
+It standardizes provider build/test/install operations and keeps local + CI workflows consistent.
+Run `make help` to see available targets.
+
+Targets:
+
+- `make tidy`: run `go mod tidy`
+- `make build`: build provider binary (`terraform-provider-dotnet-ipam-terraform`)
+- `make test`: run unit/compile tests (`go test ./...`)
+- `make testacc`: run acceptance tests (`TestAcc*`) against a real API
+- `make dev-install`: build and move provider binary into `.terraform-dev/`
+- `make lint`: currently aliases test pass (`go test ./...`)
+
+Recommended day-to-day commands:
 
 ```bash
-go mod tidy
-go test ./...
+make tidy
+make test
 ```
 
-Example configuration is in `examples/basic`.
+Example configuration is in `examples/basic` and `examples/multi-role`.
 
 ## Run Locally with a Terraform Module
 
@@ -83,10 +100,8 @@ If you want a separate Terraform module/repo to use your local build of this pro
 From this repository:
 
 ```bash
-go mod tidy
-go build -o terraform-provider-dotnet-ipam-terraform .
-mkdir -p ./.terraform-dev
-mv terraform-provider-dotnet-ipam-terraform ./.terraform-dev/
+make tidy
+make dev-install
 ```
 
 ### 2. Create a Terraform CLI config with `dev_overrides`
@@ -149,14 +164,70 @@ Terraform will use the local provider build from your `dev_overrides` path.
 When you change provider code:
 
 ```bash
-go build -o ./.terraform-dev/terraform-provider-dotnet-ipam-terraform .
+make dev-install
 ```
 
 Then re-run `terraform plan` in the consuming module.
 
 ## CI
 
-GitHub Actions workflow (`.github/workflows/ci.yml`) runs:
+### `ci` workflow (`.github/workflows/ci.yml`)
 
-- `go test ./...`
-- `terraform validate` for `examples/basic`
+Triggers:
+
+- `push`
+- `pull_request`
+
+Execution order:
+
+1. `make tidy` to normalize module dependencies.
+2. `make test` to run provider unit/compile tests.
+3. `make dev-install` to build and stage a local provider binary in `.terraform-dev`.
+4. Terraform validation for both examples with a `dev_overrides` CLI config:
+   - `examples/basic`
+   - `examples/multi-role`
+
+This ensures code compiles/tests, the provider binary builds, and published examples remain valid.
+
+### `release` workflow (`.github/workflows/release.yml`)
+
+Trigger:
+
+- `push` tag matching `v*` (for example `v0.1.0`)
+
+Execution order:
+
+1. `make tidy`
+2. GoReleaser `release --clean` using `.goreleaser.yaml`
+3. Publish release artifacts/checksums to GitHub Releases
+
+## Additional Docs
+
+- `docs/TROUBLESHOOTING.md`
+- `docs/COMPATIBILITY.md`
+- `docs/RELEASE.md`
+- `docs/resources/*`
+- `docs/data-sources/*`
+
+## Acceptance Tests
+
+Acceptance tests run against a real IPAM API instance.
+
+Required environment variables:
+
+- `IPAM_ACC=1`
+- `IPAM_BASE_URL`
+- `IPAM_USERNAME`
+- `IPAM_PASSWORD`
+
+Run locally:
+
+```bash
+make testacc
+```
+
+Or directly:
+
+```bash
+IPAM_ACC=1 IPAM_BASE_URL=http://localhost:8080 IPAM_USERNAME=admin IPAM_PASSWORD=Admin1234! go test ./internal/provider -v -run 'TestAcc' -count=1
+```
