@@ -34,11 +34,16 @@ Use `terraform-plugin-framework` with standard provider architecture.
 
 Provider config:
 
-- `base_url`
-- `username`
-- `password` (sensitive)
-- optional insecure TLS handling for non-prod
-- request timeout
+- `base_url` (env: `IPAM_BASE_URL`)
+- `username` (env: `IPAM_USERNAME`)
+- `password` (sensitive, env: `IPAM_PASSWORD`)
+- `timeout_seconds` (env: `IPAM_TIMEOUT_SECONDS`, default 30)
+- `insecure_skip_tls_verify` (env: `IPAM_INSECURE_SKIP_TLS_VERIFY`, default false)
+- `max_retries` (env: `IPAM_MAX_RETRIES`, default 2)
+- `retry_wait_min_ms` (env: `IPAM_RETRY_WAIT_MIN_MS`, default 200)
+- `retry_wait_max_ms` (env: `IPAM_RETRY_WAIT_MAX_MS`, default 2000)
+
+All three credential fields (`base_url`, `username`, `password`) are optional in the schema; the provider errors with a clear diagnostic if any are absent from both config and env.
 
 HTTP client layer requirements:
 

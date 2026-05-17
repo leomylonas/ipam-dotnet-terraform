@@ -49,6 +49,19 @@ provider "ipam" {
 }
 ```
 
+`base_url`, `username`, and `password` can also be supplied via environment variables, in which case the provider block arguments can be omitted:
+
+| Argument                   | Environment variable               |
+|----------------------------|------------------------------------|
+| `base_url`                 | `IPAM_BASE_URL`                    |
+| `username`                 | `IPAM_USERNAME`                    |
+| `password`                 | `IPAM_PASSWORD`                    |
+| `timeout_seconds`          | `IPAM_TIMEOUT_SECONDS`             |
+| `insecure_skip_tls_verify` | `IPAM_INSECURE_SKIP_TLS_VERIFY`    |
+| `max_retries`              | `IPAM_MAX_RETRIES`                 |
+| `retry_wait_min_ms`        | `IPAM_RETRY_WAIT_MIN_MS`           |
+| `retry_wait_max_ms`        | `IPAM_RETRY_WAIT_MAX_MS`           |
+
 ## Import ID Formats
 
 - Single ID: tenancy, user, shared subnet, allocation
