@@ -1,4 +1,4 @@
-# leomylonas/terraform-provider-dotnet-ipam
+# leomylonas/dotnet-ipam
 
 Terraform provider for the [`ipam-dotnet`](https://github.com/leomylonas/ipam-dotnet) API.
 
@@ -111,7 +111,7 @@ Create a file (for example `~/.terraformrc` or a temporary file) with:
 ```hcl
 provider_installation {
   dev_overrides {
-    "leomylonas/terraform-provider-dotnet-ipam" = "/absolute/path/to/terraform-provider-dotnet-ipam/.terraform-dev"
+    "leomylonas/dotnet-ipam" = "/absolute/path/to/terraform-provider-dotnet-ipam/.terraform-dev"
   }
   direct {}
 }
@@ -135,7 +135,7 @@ In the consuming module:
 terraform {
   required_providers {
     ipam = {
-      source  = "leomylonas/terraform-provider-dotnet-ipam"
+      source  = "leomylonas/dotnet-ipam"
       version = "0.1.0"
     }
   }
