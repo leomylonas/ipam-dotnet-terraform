@@ -67,6 +67,26 @@ func (p *ipamProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 
+	// During terraform validate (and some plan paths), provider configuration
+	// values can remain unknown. In that mode we should not fail configuration;
+	// install a placeholder client so schema/config validation can proceed.
+	if config.BaseURL.IsUnknown() || config.Username.IsUnknown() || config.Password.IsUnknown() {
+		placeholder, _ := newAPIClient(
+			"http://127.0.0.1",
+			"placeholder",
+			"placeholder",
+			30*time.Second,
+			false,
+			0,
+			200*time.Millisecond,
+			200*time.Millisecond,
+		)
+		data := &providerData{client: placeholder}
+		resp.ResourceData = data
+		resp.DataSourceData = data
+		return
+	}
+
 	if config.TimeoutSeconds.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(path.Root("timeout_seconds"), "Unknown timeout", "timeout_seconds must be known")
 		return

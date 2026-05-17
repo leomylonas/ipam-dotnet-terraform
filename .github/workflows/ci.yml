@@ -27,7 +27,7 @@ jobs:
           cat > "$RUNNER_TEMP/terraformrc" <<RC
           provider_installation {
             dev_overrides {
-              "leomylonas/dotnet-ipam-terraform" = "${PWD}/.terraform-dev"
+              "leomylonas/terraform-provider-dotnet-ipam" = "${PWD}/.terraform-dev"
             }
             direct {}
           }

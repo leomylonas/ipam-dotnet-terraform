@@ -2,7 +2,7 @@
 
 ## Summary
 
-`leomylonas/dotnet-ipam-terraform` is a Terraform provider for the `ipam-dotnet` API.
+`leomylonas/terraform-provider-dotnet-ipam` is a Terraform provider for the `ipam-dotnet` API.
 
 Current implementation includes:
 

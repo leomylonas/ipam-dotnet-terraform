@@ -17,7 +17,7 @@ The GitHub workflow `.github/workflows/release.yml` runs automatically on matchi
 ## Packaging
 
 - Packaging config is in `.goreleaser.yaml`
-- Binary name: `terraform-provider-dotnet-ipam-terraform`
+- Binary name: `terraform-provider-dotnet-ipam`
 - Targets: Linux/macOS/Windows for amd64 + arm64
 
 ## Requirements

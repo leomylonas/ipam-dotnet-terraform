@@ -1,4 +1,4 @@
-# leomylonas/dotnet-ipam-terraform
+# leomylonas/terraform-provider-dotnet-ipam
 
 Terraform provider for the [`ipam-dotnet`](https://github.com/leomylonas/ipam-dotnet) API.
 
@@ -76,7 +76,7 @@ Run `make help` to see available targets.
 Targets:
 
 - `make tidy`: run `go mod tidy`
-- `make build`: build provider binary (`terraform-provider-dotnet-ipam-terraform`)
+- `make build`: build provider binary (`terraform-provider-dotnet-ipam`)
 - `make test`: run unit/compile tests (`go test ./...`)
 - `make testacc`: run acceptance tests (`TestAcc*`) against a real API
 - `make dev-install`: build and move provider binary into `.terraform-dev/`
@@ -111,7 +111,7 @@ Create a file (for example `~/.terraformrc` or a temporary file) with:
 ```hcl
 provider_installation {
   dev_overrides {
-    "leomylonas/dotnet-ipam-terraform" = "/absolute/path/to/dotnet-ipam-terraform/.terraform-dev"
+    "leomylonas/terraform-provider-dotnet-ipam" = "/absolute/path/to/terraform-provider-dotnet-ipam/.terraform-dev"
   }
   direct {}
 }
@@ -135,7 +135,7 @@ In the consuming module:
 terraform {
   required_providers {
     ipam = {
-      source  = "leomylonas/dotnet-ipam-terraform"
+      source  = "leomylonas/terraform-provider-dotnet-ipam"
       version = "0.1.0"
     }
   }
