@@ -4,7 +4,7 @@ Allocates a contiguous block of IPs.
 
 ## Schema
 
-- Required: `subnet_id`, `count`, `description`
+- Required: `subnet_id`, `allocation_count`, `description`
 - Computed: `id`, `bulk_id`, `allocation_ids`, `ip_addresses`
 
 ## Example
@@ -12,7 +12,7 @@ Allocates a contiguous block of IPs.
 ```hcl
 resource "ipam_bulk_allocation" "nodes" {
   subnet_id   = ipam_private_subnet.team_a.id
-  count       = 3
+  allocation_count = 3
   description = "worker-nodes"
 }
 ```

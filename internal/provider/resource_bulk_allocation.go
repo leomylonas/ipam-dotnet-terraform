@@ -20,13 +20,13 @@ var _ resource.ResourceWithImportState = &bulkAllocationResource{}
 type bulkAllocationResource struct{ client *apiClient }
 
 type bulkAllocationResourceModel struct {
-	ID            types.String `tfsdk:"id"`
-	SubnetID      types.String `tfsdk:"subnet_id"`
-	Count         types.Int64  `tfsdk:"count"`
-	Description   types.String `tfsdk:"description"`
-	BulkID        types.String `tfsdk:"bulk_id"`
-	AllocationIDs types.List   `tfsdk:"allocation_ids"`
-	IPAddresses   types.List   `tfsdk:"ip_addresses"`
+	ID              types.String `tfsdk:"id"`
+	SubnetID        types.String `tfsdk:"subnet_id"`
+	AllocationCount types.Int64  `tfsdk:"allocation_count"`
+	Description     types.String `tfsdk:"description"`
+	BulkID          types.String `tfsdk:"bulk_id"`
+	AllocationIDs   types.List   `tfsdk:"allocation_ids"`
+	IPAddresses     types.List   `tfsdk:"ip_addresses"`
 }
 
 func NewBulkAllocationResource() resource.Resource { return &bulkAllocationResource{} }
@@ -43,13 +43,13 @@ func (r *bulkAllocationResource) Configure(_ context.Context, req resource.Confi
 }
 func (r *bulkAllocationResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{Attributes: map[string]schema.Attribute{
-		"id":             schema.StringAttribute{Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-		"subnet_id":      schema.StringAttribute{Required: true, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-		"count":          schema.Int64Attribute{Required: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.RequiresReplace()}},
-		"description":    schema.StringAttribute{Required: true, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-		"bulk_id":        schema.StringAttribute{Computed: true},
-		"allocation_ids": schema.ListAttribute{Computed: true, ElementType: types.StringType},
-		"ip_addresses":   schema.ListAttribute{Computed: true, ElementType: types.StringType},
+		"id":               schema.StringAttribute{Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+		"subnet_id":        schema.StringAttribute{Required: true, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+		"allocation_count": schema.Int64Attribute{Required: true, PlanModifiers: []planmodifier.Int64{int64planmodifier.RequiresReplace()}},
+		"description":      schema.StringAttribute{Required: true, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+		"bulk_id":          schema.StringAttribute{Computed: true},
+		"allocation_ids":   schema.ListAttribute{Computed: true, ElementType: types.StringType},
+		"ip_addresses":     schema.ListAttribute{Computed: true, ElementType: types.StringType},
 	}}
 }
 func (r *bulkAllocationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -61,7 +61,7 @@ func (r *bulkAllocationResource) Create(ctx context.Context, req resource.Create
 	var created []allocationResponse
 	err := r.client.doJSON(ctx, http.MethodPost, "/api/allocations/bulk", map[string]any{
 		"subnetId":    plan.SubnetID.ValueString(),
-		"count":       plan.Count.ValueInt64(),
+		"count":       plan.AllocationCount.ValueInt64(),
 		"description": plan.Description.ValueString(),
 	}, &created, http.StatusCreated)
 	if err != nil {
