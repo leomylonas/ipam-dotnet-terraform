@@ -1,7 +1,7 @@
 # leomylonas/dotnet-ipam
 
 [![CI](https://github.com/leomylonas/terraform-provider-dotnet-ipam/actions/workflows/ci.yml/badge.svg)](https://github.com/leomylonas/terraform-provider-dotnet-ipam/actions/workflows/ci.yml)
-[![Release](https://github.com/leomylonas/terraform-provider-dotnet-ipam/actions/workflows/release.yml/badge.svg)](https://github.com/leomylonas/terraform-provider-dotnet-ipam/actions/workflows/release.yml)
+[![Latest Release](https://img.shields.io/github/v/release/leomylonas/terraform-provider-dotnet-ipam)](https://github.com/leomylonas/terraform-provider-dotnet-ipam/releases/latest)
 [![Go Report Card](https://goreportcard.com/badge/github.com/leomylonas/terraform-provider-dotnet-ipam)](https://goreportcard.com/report/github.com/leomylonas/terraform-provider-dotnet-ipam)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
