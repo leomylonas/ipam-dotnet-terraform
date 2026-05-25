@@ -25,7 +25,7 @@ var userObjectType = types.ObjectType{AttrTypes: map[string]attr.Type{
 
 var allocationObjectType = types.ObjectType{AttrTypes: map[string]attr.Type{
 	"id": types.StringType, "subnet_id": types.StringType, "ip_address": types.StringType,
-	"description": types.StringType, "user_id": types.StringType, "tenancy_id": types.StringType,
+	"description": types.StringType, "user_id": types.StringType,
 	"allocated_at": types.StringType, "bulk_id": types.StringType,
 }}
 
@@ -225,7 +225,6 @@ type allocationDataSourceModel struct {
 	IPAddress   types.String `tfsdk:"ip_address"`
 	Description types.String `tfsdk:"description"`
 	UserID      types.String `tfsdk:"user_id"`
-	TenancyID   types.String `tfsdk:"tenancy_id"`
 	AllocatedAt types.String `tfsdk:"allocated_at"`
 	BulkID      types.String `tfsdk:"bulk_id"`
 }
@@ -244,7 +243,7 @@ func (d *allocationDataSource) Configure(_ context.Context, req datasource.Confi
 }
 func (d *allocationDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{Attributes: map[string]schema.Attribute{
-		"id": schema.StringAttribute{Required: true}, "subnet_id": schema.StringAttribute{Computed: true}, "ip_address": schema.StringAttribute{Computed: true}, "description": schema.StringAttribute{Computed: true}, "user_id": schema.StringAttribute{Computed: true}, "tenancy_id": schema.StringAttribute{Computed: true}, "allocated_at": schema.StringAttribute{Computed: true}, "bulk_id": schema.StringAttribute{Computed: true},
+		"id": schema.StringAttribute{Required: true}, "subnet_id": schema.StringAttribute{Computed: true}, "ip_address": schema.StringAttribute{Computed: true}, "description": schema.StringAttribute{Computed: true}, "user_id": schema.StringAttribute{Computed: true}, "allocated_at": schema.StringAttribute{Computed: true}, "bulk_id": schema.StringAttribute{Computed: true},
 	}}
 }
 func (d *allocationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -264,7 +263,6 @@ func (d *allocationDataSource) Read(ctx context.Context, req datasource.ReadRequ
 			config.IPAddress = types.StringValue(a.IpAddress)
 			config.Description = types.StringValue(a.Description)
 			config.UserID = types.StringValue(a.UserID)
-			config.TenancyID = types.StringValue(a.TenancyID)
 			config.AllocatedAt = types.StringValue(a.AllocatedAt)
 			if a.BulkID == nil {
 				config.BulkID = types.StringNull()
@@ -300,7 +298,7 @@ func (d *allocationsDataSource) Configure(_ context.Context, req datasource.Conf
 func (d *allocationsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{Attributes: map[string]schema.Attribute{
 		"tag_key": schema.StringAttribute{Optional: true}, "tag_value": schema.StringAttribute{Optional: true},
-		"items": schema.ListNestedAttribute{Computed: true, NestedObject: schema.NestedAttributeObject{Attributes: map[string]schema.Attribute{"id": schema.StringAttribute{Computed: true}, "subnet_id": schema.StringAttribute{Computed: true}, "ip_address": schema.StringAttribute{Computed: true}, "description": schema.StringAttribute{Computed: true}, "user_id": schema.StringAttribute{Computed: true}, "tenancy_id": schema.StringAttribute{Computed: true}, "allocated_at": schema.StringAttribute{Computed: true}, "bulk_id": schema.StringAttribute{Computed: true}}}},
+		"items": schema.ListNestedAttribute{Computed: true, NestedObject: schema.NestedAttributeObject{Attributes: map[string]schema.Attribute{"id": schema.StringAttribute{Computed: true}, "subnet_id": schema.StringAttribute{Computed: true}, "ip_address": schema.StringAttribute{Computed: true}, "description": schema.StringAttribute{Computed: true}, "user_id": schema.StringAttribute{Computed: true}, "allocated_at": schema.StringAttribute{Computed: true}, "bulk_id": schema.StringAttribute{Computed: true}}}},
 	}}
 }
 func (d *allocationsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -331,7 +329,7 @@ func (d *allocationsDataSource) Read(ctx context.Context, req datasource.ReadReq
 		if a.BulkID != nil {
 			bulk = types.StringValue(*a.BulkID)
 		}
-		items = append(items, map[string]types.String{"id": types.StringValue(a.ID), "subnet_id": types.StringValue(a.SubnetID), "ip_address": types.StringValue(a.IpAddress), "description": types.StringValue(a.Description), "user_id": types.StringValue(a.UserID), "tenancy_id": types.StringValue(a.TenancyID), "allocated_at": types.StringValue(a.AllocatedAt), "bulk_id": bulk})
+		items = append(items, map[string]types.String{"id": types.StringValue(a.ID), "subnet_id": types.StringValue(a.SubnetID), "ip_address": types.StringValue(a.IpAddress), "description": types.StringValue(a.Description), "user_id": types.StringValue(a.UserID), "allocated_at": types.StringValue(a.AllocatedAt), "bulk_id": bulk})
 	}
 	list, diags := types.ListValueFrom(ctx, allocationObjectType, items)
 	resp.Diagnostics.Append(diags...)

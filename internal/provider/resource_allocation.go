@@ -24,7 +24,6 @@ type allocationResourceModel struct {
 	Description types.String `tfsdk:"description"`
 	IPAddress   types.String `tfsdk:"ip_address"`
 	UserID      types.String `tfsdk:"user_id"`
-	TenancyID   types.String `tfsdk:"tenancy_id"`
 	AllocatedAt types.String `tfsdk:"allocated_at"`
 	BulkID      types.String `tfsdk:"bulk_id"`
 }
@@ -48,7 +47,6 @@ func (r *allocationResource) Schema(_ context.Context, _ resource.SchemaRequest,
 		"description":  schema.StringAttribute{Required: true, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 		"ip_address":   schema.StringAttribute{Computed: true},
 		"user_id":      schema.StringAttribute{Computed: true},
-		"tenancy_id":   schema.StringAttribute{Computed: true},
 		"allocated_at": schema.StringAttribute{Computed: true},
 		"bulk_id":      schema.StringAttribute{Computed: true},
 	}}
@@ -70,7 +68,6 @@ func (r *allocationResource) Create(ctx context.Context, req resource.CreateRequ
 	plan.ID = types.StringValue(created.ID)
 	plan.IPAddress = types.StringValue(created.IpAddress)
 	plan.UserID = types.StringValue(created.UserID)
-	plan.TenancyID = types.StringValue(created.TenancyID)
 	plan.AllocatedAt = types.StringValue(created.AllocatedAt)
 	if created.BulkID == nil {
 		plan.BulkID = types.StringNull()
@@ -96,7 +93,6 @@ func (r *allocationResource) Read(ctx context.Context, req resource.ReadRequest,
 			state.Description = types.StringValue(a.Description)
 			state.IPAddress = types.StringValue(a.IpAddress)
 			state.UserID = types.StringValue(a.UserID)
-			state.TenancyID = types.StringValue(a.TenancyID)
 			state.AllocatedAt = types.StringValue(a.AllocatedAt)
 			if a.BulkID == nil {
 				state.BulkID = types.StringNull()

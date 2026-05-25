@@ -38,7 +38,6 @@ func (d *bulkAllocationsDataSource) Schema(_ context.Context, _ datasource.Schem
 			"id":          schema.StringAttribute{Computed: true},
 			"ip_address":  schema.StringAttribute{Computed: true},
 			"subnet_id":   schema.StringAttribute{Computed: true},
-			"tenancy_id":  schema.StringAttribute{Computed: true},
 			"description": schema.StringAttribute{Computed: true},
 		}}},
 	}}
@@ -63,7 +62,6 @@ func (d *bulkAllocationsDataSource) Read(ctx context.Context, req datasource.Rea
 			"id":          types.StringValue(a.ID),
 			"ip_address":  types.StringValue(a.IpAddress),
 			"subnet_id":   types.StringValue(a.SubnetID),
-			"tenancy_id":  types.StringValue(a.TenancyID),
 			"description": types.StringValue(a.Description),
 		})
 	}
@@ -71,7 +69,6 @@ func (d *bulkAllocationsDataSource) Read(ctx context.Context, req datasource.Rea
 		"id":          types.StringType,
 		"ip_address":  types.StringType,
 		"subnet_id":   types.StringType,
-		"tenancy_id":  types.StringType,
 		"description": types.StringType,
 	}}
 	list, diags := types.ListValueFrom(ctx, obj, items)

@@ -36,7 +36,6 @@ type allocationResponse struct {
 	ID          string  `json:"id"`
 	IpAddress   string  `json:"ipAddress"`
 	UserID      string  `json:"userId"`
-	TenancyID   string  `json:"tenancyId"`
 	SubnetID    string  `json:"subnetId"`
 	Description string  `json:"description"`
 	AllocatedAt string  `json:"allocatedAt"`

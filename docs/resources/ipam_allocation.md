@@ -5,7 +5,7 @@ Allocates one IP from a subnet.
 ## Schema
 
 - Required: `subnet_id`, `description`
-- Computed: `id`, `ip_address`, `user_id`, `tenancy_id`, `allocated_at`, `bulk_id`
+- Computed: `id`, `ip_address`, `user_id`, `allocated_at`, `bulk_id`
 
 ## Example
 
