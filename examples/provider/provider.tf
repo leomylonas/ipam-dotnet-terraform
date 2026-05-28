@@ -1,13 +1,13 @@
 terraform {
   required_providers {
-    dotnet-ipam = {
-      source  = "leomylonas/dotnet-ipam"
+    ipam = {
+      source  = "registry.terraform.io/leomylonas/dotnet-ipam"
       version = "~> 0.0"
     }
   }
 }
 
-provider "dotnet-ipam" {
+provider "ipam" {
   base_url = "https://ipam.example.com"
   username = "admin"
   password = "changeme"

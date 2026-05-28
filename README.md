@@ -129,7 +129,7 @@ Create a file (for example `~/.terraformrc` or a temporary file) with:
 ```hcl
 provider_installation {
   dev_overrides {
-    "leomylonas/dotnet-ipam" = "/absolute/path/to/terraform-provider-dotnet-ipam/.terraform-dev"
+    "registry.terraform.io/leomylonas/dotnet-ipam" = "/absolute/path/to/terraform-provider-dotnet-ipam/.terraform-dev"
   }
   direct {}
 }
@@ -153,7 +153,7 @@ In the consuming module:
 terraform {
   required_providers {
     ipam = {
-      source  = "leomylonas/dotnet-ipam"
+      source  = "registry.terraform.io/leomylonas/dotnet-ipam"
       version = "0.1.0"
     }
   }

@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     ipam = {
-      source  = "leomylonas/dotnet-ipam"
+      source  = "registry.terraform.io/leomylonas/dotnet-ipam"
       version = "0.1.0"
     }
   }

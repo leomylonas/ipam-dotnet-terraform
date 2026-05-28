@@ -15,14 +15,14 @@ The provider uses Basic Auth and supports multi-role workflows via [aliased prov
 ```hcl
 terraform {
   required_providers {
-    dotnet-ipam = {
-      source  = "leomylonas/dotnet-ipam"
+    ipam = {
+      source  = "registry.terraform.io/leomylonas/dotnet-ipam"
       version = "~> 0.0"
     }
   }
 }
 
-provider "dotnet-ipam" {
+provider "ipam" {
   base_url = "https://ipam.example.com"
   username = "admin"
   password = var.ipam_password
@@ -34,21 +34,21 @@ provider "dotnet-ipam" {
 dotnet-ipam enforces role-based access control (`GlobalAdmin`, `TenantAdmin`, `TenantUser`). The recommended pattern is to declare one aliased provider per role so that each resource is managed under the appropriate identity.
 
 ```hcl
-provider "dotnet-ipam" {
+provider "ipam" {
   alias    = "global"
   base_url = var.ipam_base_url
   username = var.global_admin_username
   password = var.global_admin_password
 }
 
-provider "dotnet-ipam" {
+provider "ipam" {
   alias    = "tenant_admin"
   base_url = var.ipam_base_url
   username = var.tenant_admin_username
   password = var.tenant_admin_password
 }
 
-provider "dotnet-ipam" {
+provider "ipam" {
   alias    = "tenant_user"
   base_url = var.ipam_base_url
   username = var.tenant_user_username
@@ -56,16 +56,16 @@ provider "dotnet-ipam" {
 }
 
 # GlobalAdmin creates tenancy and subnet
-resource "dotnet-ipam_ipam_tenancy" "team" {
-  provider    = dotnet-ipam.global
+resource "ipam_tenancy" "team" {
+  provider    = ipam.global
   name        = "team-a"
   description = "Team A tenancy"
 }
 
 # TenantUser allocates an IP
-resource "dotnet-ipam_ipam_allocation" "host" {
-  provider    = dotnet-ipam.tenant_user
-  subnet_id   = dotnet-ipam_ipam_private_subnet.team_subnet.id
+resource "ipam_allocation" "host" {
+  provider    = ipam.tenant_user
+  subnet_id   = ipam_private_subnet.team_subnet.id
   description = "app-server-01"
 }
 ```
@@ -96,7 +96,7 @@ export IPAM_PASSWORD="changeme"
 ```
 
 ```hcl
-provider "dotnet-ipam" {}
+provider "ipam" {}
 ```
 
 ## Schema
