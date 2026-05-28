@@ -16,7 +16,7 @@ The provider uses Basic Auth and supports multi-role workflows via [aliased prov
 terraform {
   required_providers {
     ipam = {
-      source  = "registry.terraform.io/leomylonas/dotnet-ipam"
+      source  = "registry.terraform.io/leomylonas/ipam"
       version = "~> 0.0"
     }
   }

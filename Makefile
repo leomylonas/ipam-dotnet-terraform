@@ -1,4 +1,4 @@
-BINARY_NAME ?= terraform-provider-dotnet-ipam
+BINARY_NAME ?= terraform-provider-ipam
 DEV_DIR ?= .terraform-dev
 
 .PHONY: help build test testacc dev-install lint tidy

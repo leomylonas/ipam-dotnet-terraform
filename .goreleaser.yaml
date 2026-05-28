@@ -1,6 +1,6 @@
 version: 2
 
-project_name: terraform-provider-dotnet-ipam
+project_name: terraform-provider-ipam
 
 before:
   hooks:
@@ -9,7 +9,7 @@ before:
 
 builds:
   - id: provider
-    binary: terraform-provider-dotnet-ipam
+    binary: terraform-provider-ipam
     main: ./main.go
     env:
       - CGO_ENABLED=0

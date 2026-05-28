@@ -10,7 +10,7 @@ import (
 
 func main() {
 	err := providerserver.Serve(context.Background(), provider.New("dev"), providerserver.ServeOpts{
-		Address: "registry.terraform.io/leomylonas/dotnet-ipam",
+		Address: "registry.terraform.io/leomylonas/ipam",
 	})
 	if err != nil {
 		log.Fatal(err)

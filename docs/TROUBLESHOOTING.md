@@ -27,4 +27,4 @@
 ## Terraform not using local provider build
 
 - Ensure `TF_CLI_CONFIG_FILE` points to a config with `dev_overrides`.
-- Ensure the override address matches: `registry.terraform.io/leomylonas/dotnet-ipam`.
+- Ensure the override address matches: `registry.terraform.io/leomylonas/ipam`.

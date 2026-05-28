@@ -1,4 +1,4 @@
-# leomylonas/dotnet-ipam
+# leomylonas/ipam
 
 [![CI](https://github.com/leomylonas/terraform-provider-dotnet-ipam/actions/workflows/ci.yml/badge.svg)](https://github.com/leomylonas/terraform-provider-dotnet-ipam/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/leomylonas/terraform-provider-dotnet-ipam)](https://github.com/leomylonas/terraform-provider-dotnet-ipam/releases/latest)
@@ -94,7 +94,7 @@ Run `make help` to see available targets.
 Targets:
 
 - `make tidy`: run `go mod tidy`
-- `make build`: build provider binary (`terraform-provider-dotnet-ipam`)
+- `make build`: build provider binary (`terraform-provider-ipam`)
 - `make test`: run unit/compile tests (`go test ./...`)
 - `make testacc`: run acceptance tests (`TestAcc*`) against a real API
 - `make dev-install`: build and move provider binary into `.terraform-dev/`
@@ -129,7 +129,7 @@ Create a file (for example `~/.terraformrc` or a temporary file) with:
 ```hcl
 provider_installation {
   dev_overrides {
-    "registry.terraform.io/leomylonas/dotnet-ipam" = "/absolute/path/to/terraform-provider-dotnet-ipam/.terraform-dev"
+    "registry.terraform.io/leomylonas/ipam" = "/absolute/path/to/terraform-provider-dotnet-ipam/.terraform-dev"
   }
   direct {}
 }
@@ -153,7 +153,7 @@ In the consuming module:
 terraform {
   required_providers {
     ipam = {
-      source  = "registry.terraform.io/leomylonas/dotnet-ipam"
+      source  = "registry.terraform.io/leomylonas/ipam"
       version = "0.1.0"
     }
   }
