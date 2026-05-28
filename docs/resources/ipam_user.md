@@ -1,3 +1,8 @@
+---
+page_title: "ipam_user Resource - dotnet-ipam"
+description: Manages user lifecycle excluding password updates post-create.
+---
+
 # ipam_user
 
 Manages user lifecycle excluding password updates post-create.

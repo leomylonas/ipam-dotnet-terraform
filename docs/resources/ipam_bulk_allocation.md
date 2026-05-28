@@ -1,3 +1,8 @@
+---
+page_title: "ipam_bulk_allocation Resource - dotnet-ipam"
+description: Allocates a contiguous block of IPs.
+---
+
 # ipam_bulk_allocation
 
 Allocates a contiguous block of IPs.

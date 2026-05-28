@@ -1,3 +1,8 @@
+---
+page_title: "ipam_private_subnet Resource - dotnet-ipam"
+description: Manages tenant private subnets.
+---
+
 # ipam_private_subnet
 
 Manages tenant private subnets.

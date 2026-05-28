@@ -1,3 +1,8 @@
+---
+page_title: "ipam_tenancy Resource - dotnet-ipam"
+description: Manages tenancy lifecycle.
+---
+
 # ipam_tenancy
 
 Manages tenancy lifecycle.

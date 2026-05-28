@@ -1,3 +1,8 @@
+---
+page_title: "ipam_allocation Resource - dotnet-ipam"
+description: Allocates one IP from a subnet.
+---
+
 # ipam_allocation
 
 Allocates one IP from a subnet.

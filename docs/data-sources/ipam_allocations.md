@@ -1,3 +1,8 @@
+---
+page_title: "ipam_allocations Data Source - dotnet-ipam"
+description: List allocations, optional filters: `tag_key`, `tag_value`.
+---
+
 # data.ipam_allocations
 
 List allocations, optional filters: `tag_key`, `tag_value`.

@@ -1,3 +1,8 @@
+---
+page_title: "ipam_tenancy Data Source - dotnet-ipam"
+description: Lookup a tenancy by `id` or `name`.
+---
+
 # data.ipam_tenancy
 
 Lookup a tenancy by `id` or `name`.

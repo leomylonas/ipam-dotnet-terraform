@@ -1,3 +1,8 @@
+---
+page_title: "ipam_exclusion Resource - dotnet-ipam"
+description: Manages subnet exclusion ranges.
+---
+
 # ipam_exclusion
 
 Manages subnet exclusion ranges.

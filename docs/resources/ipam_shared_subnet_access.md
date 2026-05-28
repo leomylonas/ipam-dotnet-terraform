@@ -1,3 +1,8 @@
+---
+page_title: "ipam_shared_subnet_access Resource - dotnet-ipam"
+description: Manages shared subnet tenancy access grants.
+---
+
 # ipam_shared_subnet_access
 
 Manages shared subnet tenancy access grants.

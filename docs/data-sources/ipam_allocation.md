@@ -1,3 +1,8 @@
+---
+page_title: "ipam_allocation Data Source - dotnet-ipam"
+description: Lookup allocation by `id`.
+---
+
 # data.ipam_allocation
 
 Lookup allocation by `id`.

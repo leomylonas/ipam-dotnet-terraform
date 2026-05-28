@@ -1,3 +1,8 @@
+---
+page_title: "ipam_shared_subnet Resource - dotnet-ipam"
+description: Manages global shared subnets.
+---
+
 # ipam_shared_subnet
 
 Manages global shared subnets.

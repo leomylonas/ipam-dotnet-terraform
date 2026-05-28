@@ -1,3 +1,8 @@
+---
+page_title: "ipam_bulk_allocations Data Source - dotnet-ipam"
+description: List allocations by `bulk_id`.
+---
+
 # data.ipam_bulk_allocations
 
 List allocations by `bulk_id`.

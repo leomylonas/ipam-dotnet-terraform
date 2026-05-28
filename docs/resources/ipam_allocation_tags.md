@@ -1,3 +1,8 @@
+---
+page_title: "ipam_allocation_tags Resource - dotnet-ipam"
+description: Replaces all tags on an allocation.
+---
+
 # ipam_allocation_tags
 
 Replaces all tags on an allocation.

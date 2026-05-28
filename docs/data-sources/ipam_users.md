@@ -1,3 +1,8 @@
+---
+page_title: "ipam_users Data Source - dotnet-ipam"
+description: List users visible to caller; optionally filter by `tenancy_id`.
+---
+
 # data.ipam_users
 
 List users visible to caller; optionally filter by `tenancy_id`.

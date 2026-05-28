@@ -1,3 +1,8 @@
+---
+page_title: "ipam_private_subnets Data Source - dotnet-ipam"
+description: List private subnets for required `tenancy_id`.
+---
+
 # data.ipam_private_subnets
 
 List private subnets for required `tenancy_id`.
